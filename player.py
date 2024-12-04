@@ -1,3 +1,4 @@
+from main import handle_input
 from Items import Item
 from Spells import Spell
 
@@ -23,12 +24,9 @@ class Player:
             print("Выберите предмет из списка цифрой:")
             print("0: Отмена")
             for i, item in enumerate(self.items):
-                print(f"{i + 1}: {item}")
+                print(f"{i + 1}: {item.name}")
 
-            try:
-                choice = int(input())
-            except ValueError:
-                print("Вы ввели не число, попробуйсте снова")
+            choice = handle_input()
 
             if choice == 0:
                 break
@@ -46,12 +44,9 @@ class Player:
             print("Выберите заклинание из списка цифрой:")
             print("0: Отмена")
             for i, spell in enumerate(self.spells):
-                print(f"{i + 1}: {spell}")
+                print(f"{i + 1}: {spell.name}")
 
-            try:
-                choice = int(input())
-            except ValueError:
-                print("Вы ввели не число, попробуйсте снова")
+            choice = handle_input()
 
             if choice == 0:
                 break
@@ -59,6 +54,15 @@ class Player:
                 self.spells[choice - 1].use()
             except IndexError:
                 print("Нет такого заклинания, попробуйте снова")
+
+    def get_stats(self):
+        print("\n")
+        print(f"Здоровье = {self.hp}")
+        print(f"Сила = {self.strength}")
+        print(f"Мана = {self.mana}")
+        print(f"Интеллект = {self.iq}")
+        print(f"Защита = {self.defence}")
+        print(f"Уклонение = {self.dodge}")
 
 
 class Wizard(Player):
