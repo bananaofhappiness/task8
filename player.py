@@ -9,6 +9,8 @@ class Player:
         self.strength: int = 10
         self.mana: int = 10
         self.iq: int = 10
+        self.defence: int = 10
+        self.dodge: int = 10
         self.items: list[Item] = []
         self.spells: list[Spell] = []
 
@@ -63,5 +65,25 @@ class Wizard(Player):
     def __init__(self, name):
         super().__init__(name)
         self.hp: int = 80
-        self.mana = 20
+        self.mana: int = 20
         self.iq: int = 15
+        self.defence: int = 5
+        self.dodge: int = 5
+
+
+class Warrior(Player):
+    def __init__(self, name):
+        super().__init__(name)
+        self.hp: int = 120
+        self.mana: int = 5
+        self.iq: int = 5
+        self.defence: int = 15
+        self.dodge: int = 5
+
+
+class Rogue(Player):
+    def __init__(self, name):
+        super().__init__(name)
+        self.iq = 12
+        self.defence: int = 5
+        self.dodge: int = 20
