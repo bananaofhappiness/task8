@@ -12,6 +12,7 @@ class GameState(Enum):
 class TurnState(Enum):
     EXPLORING_WORLD = auto()
     IN_BATTLE = auto()
+    FOUND_ITEM = auto()
 
 
 class Game:
@@ -116,10 +117,44 @@ if __name__ == "__main__":
                 print("1: Атаковать")
                 print("2: Использовать заклинание")
                 choice = handle_input(2)
-                
+
+                while True:
+                    match choice:
+                        case 0:
+                            print("Вы сбежали и ничего не получаете!")
+                            game.turn_state = TurnState.EXPLORING_WORLD
+                            break
+                        case 1:
+                            attack, is_dead = character.attack(enemy)
+                            print(f"Вы ударили врага на {attack} ОЗ, у врага осталось {enemy.hp} ОЗ")
+
+                            if is_dead:
+                                print("Вы победили!")
+                                game.turn_state = TurnState.FOUND_ITEM
+                                break
+
+                            enemy.attack(character)
+                        case 2:
+                            character.use_spell()
+
+                    if character.hp < 0:
+                        print("Вы умерли! Конец игры!")
+                        game.state = GameState.EXITING
+                        break
+
+            case TurnState.FOUND_ITEM:
+                item = random.choice(Game.items)
+                print(f"Вы нашли предмет {item}")
+                print("Выберите опцию:")
+                print("0: Не брать")
+                print("1: Взять предмет")
+
+                choice = handle_input(1)
                 match choice:
                     case 0:
-                        print("Вы сбежали и ничего не получаете!")
-                        game.turn_state.EXPLORING_WORLD
+                        game.turn_state = TurnState.EXPLORING_WORLD
                     case 1:
-                        attack, is_dead = character.attack(enemy)
+                        if len(character.items) >= 10:
+                            print("Вы не можете таскать более 10 предметов!")
+                            game.turn_state = TurnState.EXPLORING_WORLD
+                        character.items.append(item)
