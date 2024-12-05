@@ -71,8 +71,9 @@ if __name__ == "__main__":
                 print("0: Выйти")
                 print("1: Продвинуться дальше")
                 print("2: Использовать предмет")
-                print("3: Посмотреть характеристики")
-                user_input: int = handle_input(3)
+                print("3: Экипировать предмет")
+                print("4: Посмотреть характеристики")
+                user_input: int = handle_input(4)
                 match user_input:
                     case 0:
                         game.state = GameState.EXITING
@@ -106,6 +107,8 @@ if __name__ == "__main__":
                     case 2:
                         character.use_item()
                     case 3:
+                        character.equip_item()
+                    case 4:
                         character.get_stats()
 
             case TurnState.IN_BATTLE:
