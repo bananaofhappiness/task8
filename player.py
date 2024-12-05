@@ -13,10 +13,47 @@ class Player:
         self.defence: int = 10
         self.dodge: int = 10
         self.items: list[Item] = []
-        self.spells: list[Spell] = []
-        # self.equiped: Item | None = None
+        # self.spells: list[Spell] = []
+        self.equiped: Item | None = None
 
     def use_item(self):
+        if len(self.items) == 0:
+            print("У Вас нет предметов")
+            return
+
+        while True:
+            print()
+            print("Выберите предмет из списка цифрой:")
+            print("0: Отмена")
+            for i, item in enumerate(self.items):
+                print(f"{i + 1}: {item.name}")
+
+            choice = handle_input(len(self.items))
+
+            if choice == 0:
+                break
+            self.items[choice - 1].use()
+
+    def use_spell(self):
+        if len(self.spells) == 0:
+            print()
+            print("У Вас нет заклинаний")
+            return
+
+        while True:
+            print("Выберите заклинание из списка цифрой:")
+            print("0: Отмена")
+            for i, spell in enumerate(self.spells):
+                print(f"{i + 1}: {spell.name}")
+
+
+            choice = handle_input(len(self.items))
+
+            if choice == 0:
+                break
+            self.spells[choice - 1].use()
+
+    def equip_item(self):
         if len(self.items) == 0:
             print("У Вас нет предметов")
             return
@@ -27,37 +64,21 @@ class Player:
             for i, item in enumerate(self.items):
                 print(f"{i + 1}: {item.name}")
 
-            choice = handle_input()
+            choice = handle_input(len(self.items))
 
             if choice == 0:
                 break
-            try:
-                self.items[choice - 1].use()
-            except IndexError:
-                print("Нет такого предмета, попробуйте снова")
 
-    def use_spell(self):
-        if len(self.spells) == 0:
-            print("У Вас нет заклинаний")
-            return
+            if self.equiped:
+                item = self.equiped
+                self.equiped = self.items.pop(choice - 1)
+                self.items.append(item)
+                return
 
-        while True:
-            print("Выберите заклинание из списка цифрой:")
-            print("0: Отмена")
-            for i, spell in enumerate(self.spells):
-                print(f"{i + 1}: {spell.name}")
-
-            choice = handle_input()
-
-            if choice == 0:
-                break
-            try:
-                self.spells[choice - 1].use()
-            except IndexError:
-                print("Нет такого заклинания, попробуйте снова")
+            self.equiped = self.items.pop(choice - 1)
 
     def get_stats(self):
-        print("\n")
+        print()
         print(f"Здоровье = {self.hp}")
         print(f"Сила = {self.strength}")
         print(f"Мана = {self.mana}")
