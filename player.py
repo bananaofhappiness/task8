@@ -14,6 +14,7 @@ class Player:
         self.dodge: int = 10
         self.items: list[Item] = []
         self.spells: list[Spell] = []
+        # self.equiped: Item | None = None
 
     def use_item(self):
         if len(self.items) == 0:
@@ -63,6 +64,13 @@ class Player:
         print(f"Интеллект = {self.iq}")
         print(f"Защита = {self.defence}")
         print(f"Уклонение = {self.dodge}")
+
+    def attack(self, enemy) -> bool:
+        enemy.hp -= self.strength  # + self.equiped.bonus
+
+        if enemy.hp <= 0:
+            print("Вы победили!")
+            return True
 
 
 class Wizard(Player):
