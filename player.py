@@ -1,6 +1,6 @@
 from main import handle_input
-from Items import Item
-from Spells import Spell
+from items import Item
+# from spells import Spell
 
 
 class Player:
@@ -65,12 +65,14 @@ class Player:
         print(f"Защита = {self.defence}")
         print(f"Уклонение = {self.dodge}")
 
-    def attack(self, enemy) -> bool:
-        enemy.hp -= self.strength  # + self.equiped.bonus
+    def attack(self, enemy) -> (int, bool):
+        attack: int = self.strength  # + self.equiped.bonus
+        enemy.hp -= attack
 
         if enemy.hp <= 0:
-            print("Вы победили!")
-            return True
+            return (attack, True)
+
+        return (attack, False)
 
 
 class Wizard(Player):
