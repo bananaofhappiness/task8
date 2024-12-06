@@ -54,7 +54,7 @@ class Map:
     def show_map(self):
         print(self.game_map)
 
-    def directions(self, dirnum):
+    def move(self, dirnum):
         try:
             direc = Dirs(dirnum)
         except ValueError:
@@ -76,6 +76,8 @@ class Map:
         if 0 <= new_x < 10 and 0 <= new_y < 10 and self.game_map[new_x, new_y] != 0:
             self.game_map[x, y] = 1
             self.coord = [new_x, new_y]
+            old_num = self.game_map[new_x, new_y]
             self.game_map[new_x, new_y] = 2
+            return old_num
         else:
-            print(f"Невозможно двигаться {dirnum.name}: клетка недоступна")
+            return 0
