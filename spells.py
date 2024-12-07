@@ -42,17 +42,22 @@ class Fatality(Spells):
     def use(self, character, enemy):
         super().use(character)
         enemy.hp = 0
+        print("Вы победили!")
+        game.turn_state = TurnState.FOUND_ITEM
 
-class Escape(Spells):
+class Swallow(Spells):
     def __init__(self, name, description):
         super().__init__(name, description)
-        self.name = 'Побег'
-        self.desc = 'Персонаж благополучно избегает драки'
-        self.value = 5
+        self.name = 'Ласточка'
+        self.desc = 'Здоровье персонажа увеличивается на 20 ХП на 1 атаку'
+        self.value = 1
 
     def use(self, character, enemy):
         super().use(character)
-        game.state == TurnState.NOT_IN_BATTLE
+        character.hp += 20
+        character.attack(enemy)
+        enemy.attack(character)
+        character.hp -= 20
 
 
 class Invulnerability(Spells):
@@ -60,7 +65,7 @@ class Invulnerability(Spells):
         super().__init__(name, description)
         self.name = 'Неуязвимость'
         self.desc = 'Персонаж с большей вероятностью увернется от атаки'
-        self.value = 4
+        self.value = 1
 
     def use(self, character, enemy):
         super().use(character)
