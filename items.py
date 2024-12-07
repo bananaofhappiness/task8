@@ -1,5 +1,5 @@
 import random
-from main import Game
+import main
 
 
 class Item:
@@ -11,7 +11,7 @@ class Item:
         return f'{self.name}'
     
     def __str__(self):
-        return f'{self.name}. {self.description}'
+        return f'{self.name}. {self.desc}'
 
 
 class Potion(Item):
@@ -53,7 +53,7 @@ class Trap(Item):
         if character.strength < self.diff:
             character.hp -= self.inj
             return f'Персонаж не смог выбраться из капкана и ему пришлось ампутировать конечность. Показатель hp уменьшен на {self.inj}'
-        enemy = random.choice(Game.enemies)
+        enemy = random.choice(main.Game.enemies)
         print(f'Неожиданно напал {enemy.name}')
         enemy.attack()
 
@@ -62,7 +62,7 @@ class Chest(Item):
     def __init__(self, name, description, difficulty):
         super().__init__(name, description)
         self.diff = difficulty
-        self.item = random.choice(Game.spells)
+        self.item = random.choice(main.Game.spells)
 
     def use(self, character):
         if character.strength < self.diff:
@@ -71,7 +71,7 @@ class Chest(Item):
                     return f'Сундук открыт заклинанием. В сундуке оказалось заклинание {self.item}'
             return f'Сундук не удалось открыть. Попробуйте увеличить показатель силы, маны или получите заклинание для открытия сундука'
         character.spells.append(self.item)
-        Game.spells.remove(self.item)
+        main.Game.spells.remove(self.item)
         return f'Сундук открыт. В сундуке оказалось заклинание {self.item}'
     
 

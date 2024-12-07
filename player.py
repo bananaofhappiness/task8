@@ -1,6 +1,6 @@
 from main import handle_input
 from items import Item
-# from spells import Spell
+from spells import Spells
 
 
 class Player:
@@ -13,7 +13,7 @@ class Player:
         self.defence: int = 10
         self.dodge: int = 10
         self.items: list[Item] = []
-        # self.spells: list[Spell] = []
+        self.spells: list[Spells] = []
         self.equiped: Item | None = None
 
     def use_item(self):
@@ -45,7 +45,6 @@ class Player:
             print("0: Отмена")
             for i, spell in enumerate(self.spells):
                 print(f"{i + 1}: {spell.name}")
-
 
             choice = handle_input(len(self.items))
 
@@ -87,7 +86,10 @@ class Player:
         print(f"Уклонение = {self.dodge}")
 
     def attack(self, enemy) -> (int, bool):
-        attack: int = self.strength  # + self.equiped.bonus
+        attack: int = self.strength
+        if self.equiped:
+            if self.equiped.power:
+                attack += self.equiped.power
         enemy.hp -= attack
 
         if enemy.hp <= 0:
