@@ -1,5 +1,5 @@
 import random
-from main import Game
+from main import game
 
 
 class Item:
@@ -53,26 +53,23 @@ class Trap(Item):
         if character.strength < self.diff:
             character.hp -= self.inj
             return f'Персонаж не смог выбраться из капкана и ему пришлось ампутировать конечность. Показатель hp уменьшен на {self.inj}'
-        enemy = random.choice(Game.enemies)
-        print(f'Неожиданно напал {enemy.name}')
-        enemy.attack()
+        print(f'Неожиданно кто-то напал из кустов!')
+        game.turn_state = TurnState.IN_BATTLE
 
 
 class Chest(Item):
     def __init__(self, name, description, difficulty):
         super().__init__(name, description)
         self.diff = difficulty
-        self.item = random.choice(Game.spells)
 
     def use(self, character):
         if character.strength < self.diff:
             if character.mana >= 2:
                 if 'chest_open' in character.spells:
-                    return f'Сундук открыт заклинанием. В сундуке оказалось заклинание {self.item}'
+                    return f'Сундук открыт заклинанием. В сундуке оказалось заклинание!'
             return f'Сундук не удалось открыть. Попробуйте увеличить показатель силы, маны или получите заклинание для открытия сундука'
-        character.spells.append(self.item)
-        Game.spells.remove(self.item)
-        return f'Сундук открыт. В сундуке оказалось заклинание {self.item}'
+        return f'Сундук открыт. В сундуке оказалось заклинание!'
+        game.state = TurnState.FOUND_SPELL
     
 
 class Shield(Item):
@@ -81,11 +78,16 @@ class Shield(Item):
         self.weight = weight
         self.power = power
 
-    def use(self, character):
+    def equip(self, character):
         if character.strength < self.weight:
             return f'Щит слишком тяжелый. Улучшите показатель силы'
         character.defence += self.power
+        character.equiped.append(self)
         return f'Щит используется. Показатель защиты увеличен на {self.power}'
+
+    def deequip(self, character):
+        character.defence -= self.power
+        character.equiped.remove(self)
     
 
 class Boots(Item):
@@ -93,6 +95,25 @@ class Boots(Item):
         super().__init__(name, description)
         self.power = power
 
-    def use(self, character):
+    def equip(self, character):
         character.dodge += self.power
+        character.equiped.append(self)
         return f'Ботинки используются. Показатель уклонения увеличен на {self.power}'
+
+    def deequip(self, character):
+        character.dodge -= self.power
+        character.equiped.remove(self)
+
+class Sword(Item):
+    def __init__(self, name, description, power):
+        super().__init__(name, description)
+        self.power = power
+
+    def equip(self, character):
+        character.strength += self.power
+        character.equiped.append(self)
+        return f'Меч используется. Показатель силы увеличен на {self.power}'
+
+    def deequip(self, character):
+        character.strength -= self.power
+        character.equiped.remove(self)
