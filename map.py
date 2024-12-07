@@ -1,13 +1,13 @@
 import numpy as np
 import random as rn
-from enum import Enum, auto
+from enum import Enum
 
 
 class Dirs(Enum):
-    UP = auto()
-    DOWN = auto()
-    LEFT = auto()
-    RIGHT = auto()
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
 
 
 class Map:
@@ -67,7 +67,7 @@ class Map:
             new_x, new_y = x + 1, y
         elif direc == Dirs.LEFT:
             new_x, new_y = x, y - 1
-        elif direc == Dirs.Right:
+        elif direc == Dirs.RIGHT:
             new_x, new_y = x, y + 1
         else:
             print("Некорректное направление")
@@ -78,6 +78,7 @@ class Map:
             self.coord = [new_x, new_y]
             old_num = self.game_map[new_x, new_y]
             self.game_map[new_x, new_y] = 2
+            print(old_num)
             return old_num
         else:
             return 0

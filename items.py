@@ -1,5 +1,6 @@
 import random
-from main import game
+import main
+
 
 
 class Item:
@@ -11,7 +12,7 @@ class Item:
         return f'{self.name}'
     
     def __str__(self):
-        return f'{self.name}. {self.description}'
+        return f'{self.name}. {self.desc}'
 
 
 class Potion(Item):
@@ -61,6 +62,7 @@ class Chest(Item):
     def __init__(self, name, description, difficulty):
         super().__init__(name, description)
         self.diff = difficulty
+        self.item = random.choice(main.Game.spells)
 
     def use(self, character):
         if character.strength < self.diff:
@@ -70,6 +72,7 @@ class Chest(Item):
             return f'Сундук не удалось открыть. Попробуйте увеличить показатель силы, маны или получите заклинание для открытия сундука'
         return f'Сундук открыт. В сундуке оказалось заклинание!'
         game.state = TurnState.FOUND_SPELL
+
     
 
 class Shield(Item):

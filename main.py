@@ -1,6 +1,8 @@
 import player
-# import Map
+import map
 import random
+from enemies import Witch, Bandit, Boss
+from items import Potion
 from enum import Enum, auto
 
 
@@ -16,7 +18,14 @@ class TurnState(Enum):
 
 
 class Game:
-    enemies = []
+    enemies = [
+            Witch("a"),
+            Bandit("a"),
+            Boss("a"),
+            ]
+    items = [
+            Potion("А", "a", "strength", 10)
+            ]
 
     def __init__(self):
         self.state: GameState = GameState.RUNNING
@@ -27,12 +36,14 @@ def handle_input(n):
     while True:
         try:
             user_input: str = int(input())
-            return user_input
         except ValueError:
             print("Вы ввели не цифру, попробуйте снова")
+            continue
 
         if user_input > n or user_input < 0:
             print("Такого выбора нет, попробуйсте снова")
+
+        return user_input
 
 
 if __name__ == "__main__":
@@ -63,6 +74,8 @@ if __name__ == "__main__":
                 character = player.Rogue(name)
                 break
 
+    game_map = map.Map()
+    game_map.generation(20, 20)
     while game.state == GameState.RUNNING:
         match game.turn_state:
             case TurnState.EXPLORING_WORLD:
@@ -73,36 +86,43 @@ if __name__ == "__main__":
                 print("2: Использовать предмет")
                 print("3: Экипировать предмет")
                 print("4: Посмотреть характеристики")
+                print("5: Показать карту")
                 user_input: int = handle_input(4)
                 match user_input:
                     case 0:
                         game.state = GameState.EXITING
                     case 1:
+                        print()
                         print("Выберите направление:")
+                        print("1: Вверх")
+                        print("2: Вниз")
+                        print("3: Влево")
+                        print("4: Вправо")
                         direction = handle_input(3)
                         while True:
-                            match direction:
-                                case Map.Directions.RIGHT.value:
-                                    tile = Map.move(Directions.RIGHT)
-                                    break
+                            match direction - 1:
+                                case map.Dirs.RIGHT.value:
+                                    tile = game_map.move(map.Dirs.RIGHT)
 
-                                case Map.Directions.LEFT.value:
-                                    tile = Map.move(Directions.LEFT)
-                                    break
+                                case map.Dirs.LEFT.value:
+                                    tile = game_map.move(map.Dirs.LEFT)
 
-                                case Map.Directions.UP.value:
-                                    tile = Map.move(Directions.UP)
-                                    break
+                                case map.Dirs.UP.value:
+                                    tile = game_map.move(map.Dirs.UP)
 
-                                case Map.Directions.DOWN.value:
-                                    tile = Map.move(Directions.DOWN)
-                                    break
+                                case map.Dirs.DOWN.value:
+                                    tile = game_map.move(map.Dirs.DOWN)
 
                                 case _:
                                     print("Такого направления нет, попробуйте снова")
+                                    continue
 
-                            if tile == _: # враг
+                            if tile == 3:  # враг
                                 game.turn_state = TurnState.IN_BATTLE
+
+                            if tile == 4:  # предмет
+                                game.turn_state = TurnState.FOUND_ITEM
+                            break
 
                     case 2:
                         character.use_item()
@@ -110,18 +130,20 @@ if __name__ == "__main__":
                         character.equip_item()
                     case 4:
                         character.get_stats()
+                    case 5:
+                        game_map.show_map()
 
             case TurnState.IN_BATTLE:
                 enemy = random.choice(Game.enemies)
-                print()
-                print(f"Вы встретили врага {enemy.name}")
-                print("Выберите цифрой вариант:")
-                print("0: Сбежать")
-                print("1: Атаковать")
-                print("2: Использовать заклинание")
-                choice = handle_input(2)
 
                 while True:
+                    print()
+                    print(f"Вы встретили врага {enemy.name}")
+                    print("Выберите цифрой вариант:")
+                    print("0: Сбежать")
+                    print("1: Атаковать")
+                    print("2: Использовать заклинание")
+                    choice = handle_input(2)
                     match choice:
                         case 0:
                             print("Вы сбежали и ничего не получаете!")
@@ -136,14 +158,16 @@ if __name__ == "__main__":
                                 game.turn_state = TurnState.FOUND_ITEM
                                 break
 
-                            enemy.attack(character)
+                            print(enemy.attack(character))
+                            print(f"У вас осталось {character.hp}")
+                            if character.hp <= 0:
+                                print("Вы умерли! Конец игры!")
+                                game.state = GameState.EXITING
+                                break
+                            continue
                         case 2:
                             character.use_spell()
-
-                    if character.hp < 0:
-                        print("Вы умерли! Конец игры!")
-                        game.state = GameState.EXITING
-                        break
+                            continue
 
             case TurnState.FOUND_ITEM:
                 item = random.choice(Game.items)
@@ -161,3 +185,4 @@ if __name__ == "__main__":
                             print("Вы не можете таскать более 10 предметов!")
                             game.turn_state = TurnState.EXPLORING_WORLD
                         character.items.append(item)
+                        game.turn_state = TurnState.EXPLORING_WORLD
