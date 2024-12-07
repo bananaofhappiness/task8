@@ -1,3 +1,6 @@
+import random
+
+
 class Enemies():
     def __init__(self, name, hp=100, attacki=10):
         self.name = name
@@ -5,8 +8,12 @@ class Enemies():
         self.attacki = attacki
 
     def attack(self, character):
-        character.hp -= self.attacki
-        return f'{self.name} ранит героя на {self.attacki} урона'
+        probability = character.dodge * 10
+        random_number = random.randint(0, 100)
+        if random_number > probability:
+            character.hp -= (self.attacki - self.attacki * character.defence // 10)
+            return f'{self.name} ранит героя на {self.attacki} урона'
+        return f'Персонаж успешно отразил атаку'
 
 
 class Witch(Enemies):
