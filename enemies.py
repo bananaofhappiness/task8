@@ -8,10 +8,10 @@ class Enemies():
         self.attacki = attacki
 
     def attack(self, character):
-        probability = character.dodge * 10
+        probability = character.dodge
         random_number = random.randint(0, 100)
         if random_number > probability:
-            character.hp -= (self.attacki - self.attacki * character.defence // 10)
+            character.hp -= (self.attacki - self.attacki * character.defence // 100)
             return f'{self.name} ранит героя на {self.attacki} урона'
         return f'Персонаж успешно отразил атаку'
 
