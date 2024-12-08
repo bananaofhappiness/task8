@@ -23,10 +23,10 @@ class Spells():
 
 
 class Froze(Spells):
-    def __init__(self, name, description):
-        super().__init__(name, description)
+    def __init__(self, name, description, value):
+        super().__init__(name, description, value)
         self.name = 'Заморозка'
-        self.desc = 'Персонаж атакует врага без ответной атаки'
+        self.desc = 'Персонаж атакует врага в рукопашную без ответной атаки'
         self.value = 2
 
     def use(self, character, enemy):
@@ -35,8 +35,8 @@ class Froze(Spells):
 
 
 class Fatality(Spells):
-    def __init__(self, name, description):
-        super().__init__(name, description)
+    def __init__(self, name, description, value):
+        super().__init__(name, description, value)
         self.name = 'Фаталити'
         self.desc = 'Персонаж добивает врага'
         self.value = 7
@@ -44,21 +44,20 @@ class Fatality(Spells):
     def use(self, character, enemy):
         super().use(character)
         enemy.hp = 0
-        print("Вы победили!")
-        game.turn_state = TurnState.FOUND_ITEM
+
 
 class Swallow(Spells):
-    def __init__(self, name, description):
-        super().__init__(name, description)
+    def __init__(self, name, description, value):
+        super().__init__(name, description, value)
         self.name = 'Ласточка'
-        self.desc = 'Здоровье персонажа увеличивается на 20 ХП на 1 атаку'
+        self.desc = 'Здоровье персонажа увеличивается на 20 ХП на 60 секунд'
         self.value = 1
 
-    def use(self, character):
+    def use(self, character, enemy):
         super().use(character)
         character.hp += 20
         print(f"Здоровье увеличено до {character.hp}")
-        threading.Thread(target=self.reset_health).start()
+        threading.Thread(target=self.reset_health(), args=[character]).start()
 
     def reset_health(self, character):
         time.sleep(60)
@@ -66,17 +65,17 @@ class Swallow(Spells):
 
 
 class Invulnerability(Spells):
-    def __init__(self, name, description):
-        super().__init__(name, description)
+    def __init__(self, name, description, value):
+        super().__init__(name, description, value)
         self.name = 'Неуязвимость'
-        self.desc = 'Персонаж с большей вероятностью увернется от атаки'
+        self.desc = 'Персонаж с большей вероятностью увернется от атаки в течение следующей минуты'
         self.value = 1
 
-    def use(self, character):
+    def use(self, character, enemy):
         super().use(character)
         character.dodge += 10
         print(f"Уклонение увеличено до {character.dodge}")
-        threading.Thread(target=self.reset_dodge).start()
+        threading.Thread(target=self.reset_dodge, args=[character]).start()
 
     def reset_dodge(self, character):
         time.sleep(60)
@@ -84,8 +83,8 @@ class Invulnerability(Spells):
 
 
 class Distant_Attack(Spells):
-    def __init__(self, name, description):
-        super().__init__(name, description)
+    def __init__(self, name, description, value):
+        super().__init__(name, description, value)
         self.name = 'Огненный заряд'
         self.desc = 'Персонаж кастует огненный заряд, наносящий урон противнику'
         self.value = 2
@@ -93,3 +92,14 @@ class Distant_Attack(Spells):
     def use(self, character, enemy):
         super().use(character)
         enemy.hp -= 20
+
+
+class Chest_Open(Spells):
+    def __init__(self, name, description, value):
+        super().__init__(name, description, value)
+        self.name = 'Заклинание открытия сундука'
+        self.desc = 'Открывает сундук'
+        self.value = 0
+
+    def use(self, character, enemy):
+        print("Оно используется автоматически, когда вы встретите сундук")
