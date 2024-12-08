@@ -1,13 +1,13 @@
 import numpy as np
 import random as rn
-from enum import Enum, auto
+from enum import Enum
 
 
 class Dirs(Enum):
-    UP = auto()
-    DOWN = auto()
-    LEFT = auto()
-    RIGHT = auto()
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
 
 
 class Map:
