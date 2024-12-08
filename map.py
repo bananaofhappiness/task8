@@ -13,16 +13,15 @@ class Dirs(Enum):
 class Map:
     def __init__(self):
         self.game_map = np.array([[1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-                            [1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-                            [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-                            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-                            [0, 0, 1, 1, 0, 1, 1, 0, 1, 0],
-                            [0, 0, 1, 0, 0, 1, 1, 0, 1, 0],
-                            [0, 0, 0, 0, 0, 1, 1, 0, 1, 1],
-                            [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
-                            [0, 0, 0, 0, 0, 1, 1, 1, 1, 0],
-                            [0, 0, 0, 0, 0, 1, 1, 1, 1, 0]])
-
+                                  [1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+                                  [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+                                  [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+                                  [0, 0, 1, 1, 0, 1, 1, 0, 1, 0],
+                                  [0, 0, 1, 0, 0, 1, 1, 0, 1, 0],
+                                  [0, 0, 0, 0, 0, 1, 1, 0, 1, 1],
+                                  [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+                                  [0, 0, 0, 0, 0, 1, 1, 1, 1, 0],
+                                  [0, 0, 0, 0, 0, 1, 1, 1, 1, 0]])
 
         while True:
             x = rn.randint(0, 9)
@@ -39,20 +38,38 @@ class Map:
             while self.monnum != 0:
                 mx = rn.randint(0, 9)
                 my = rn.randint(0, 9)
-                if self.game_map[mx, my] != (0 and 2):
+                if self.game_map[mx, my] != 0 and self.game_map[mx, my] != 2:
                     self.game_map[mx, my] = 3
                     self.monnum -= 1
             while self.itemnum != 0:
                 mx = rn.randint(0, 9)
                 my = rn.randint(0, 9)
-                if self.game_map[mx, my] != (0 and 2 and 3):
+                if self.game_map[mx, my] != 0 and self.game_map[mx, my] != 2 and self.game_map[mx, my] != 3:
                     self.game_map[mx, my] = 4
                     self.itemnum -= 1
         else:
             print("Генерация мира по вашим параметрам невозможна, попробуйте снова")
 
     def show_map(self):
-        print(self.game_map)
+        new_game_map = self.game_map.astype(str)
+        for i in range(10):
+            for j in range(10):
+                if new_game_map[i, j] == '0':
+                    new_game_map[i, j] = '  '
+                elif new_game_map[i, j] == '1':
+                    new_game_map[i, j] = '*'
+                elif new_game_map[i, j] == '2':
+                    new_game_map[i, j] = '@'
+                elif new_game_map[i, j] == '3':
+                    new_game_map[i, j] = ':<'
+                elif new_game_map[i, j] == '4':
+                    new_game_map[i, j] = '?'
+        maxlen = max([len(str(j)) for i in new_game_map for j in i]) + 1
+        for i in new_game_map:
+            for j in i:
+                print(f'{j:>{maxlen}}', end=" ")
+            print()
+
 
     def move(self, dirnum):
         try:
