@@ -2,7 +2,8 @@ import player
 import map
 import random
 from enemies import Witch, Bandit, Boss
-from items import Potion
+from items import Potion, Shield, Sword, Boots, Book, Chest, Trap
+from spells import Froze, Fatality, Swallow, Invulnerability, Distant_Attack, Chest_Open
 from enum import Enum, auto
 
 
@@ -15,21 +16,52 @@ class TurnState(Enum):
     EXPLORING_WORLD = auto()
     IN_BATTLE = auto()
     FOUND_ITEM = auto()
+    FOUND_SPELL = auto()
+    TALK_TO_NPC = auto()
 
 
 class Game:
-    enemies = [
-            Witch("a"),
-            Bandit("a"),
-            Boss("a"),
-            ]
     items = [
-            Potion("А", "a", "strength", 10)
+            Potion("Зелье силы", "Увеличивает силу на 5", "strength", 5),
+            Potion("Зелье интеллекта", "Увеличивает интеллект на 5", "iq", 5),
+            Potion("Зелье маны", "Увеличивает ману на 5", "mana", 5),
+            Potion("Зелье защиты", "Увеличивает защиту на 5", "defence", 5),
+            Potion("Зелье уклонения", "Увеличивает уклонение на 5", "dodge", 5),
+            Potion("Большое зелье силы", "Увеличивает силу на 10", "strength", 10),
+            Potion("Большое зелье интеллекта", "Увеличивает интеллект на 10", "iq", 10),
+            Potion("Большое зелье маны", "Увеличивает ману на 10", "mana", 10),
+            Potion("Большое зелье защиты", "Увеличивает защиту на 10", "defence", 10),
+            Potion("Большое зелье уклонения", "Увеличивает уклонение на 10", "dodge", 10),
+            Shield("Щит", "Дает бонус к защите (5)", 20, 5),
+            Shield("Большой щит", "Дает бонус к защите (10)", 50, 10),
+            Sword("Меч", "Дает бонус к атаке (5)", 5),
+            Sword("Большой меч", "Дает бонус к атаке (10)", 10),
+            Boots("Сапоги", "Дают бонус к уклонению (5)", 5),
+            Boots("Кроссовки", "Дают бонус к уклонению (10)", 10),
+            Book("Книга для малышей", "Повышает интеллект на 5", 10, 5),
+            Book("Любовный роман", "Повышает интеллект на 10", 20, 10),
+            Book("Учебник", "Повышает интеллект на 20", 50, 20),
+            Chest("Старый сундук", "Полусломанный сундук, легко открывается", 15),
+            Chest("Cундук", "Крепкий сундкук, чтобы сломать, нужно быть очень сильным", 20),
+            Trap("Ловушка с колючей проволкой", "В ней тяжело и больно передвигаться", 15, 15),
+            Trap("Капкан", "Он может легко оставить без ноги", 20, 20),
+            Trap("Ловушка с растяжкой", "Совсем невидимая!", 20, 20)
+            ]
+
+    spells = [
+            Froze('', '', 0),
+            Fatality('', '', 0),
+            Invulnerability("", "", 0),
+            Chest_Open("", "", 0),
+            Swallow("", "", 0),
+            Distant_Attack("", "", 0),
             ]
 
     def __init__(self):
         self.state: GameState = GameState.RUNNING
         self.turn_state: TurnState = TurnState.EXPLORING_WORLD
+        self.killed_enemies = 0
+        self.cleared_maps = 0
 
 
 def handle_input(n):
@@ -66,6 +98,8 @@ if __name__ == "__main__":
                 break
             case 1:
                 character = player.Wizard(name)
+                s = Invulnerability("", "", 0)
+                Game.spells = [spell for spell in Game.spells if not isinstance(spell, s.__class__)]
                 break
             case 2:
                 character = player.Warrior(name)
@@ -75,22 +109,32 @@ if __name__ == "__main__":
                 break
 
     game_map = map.Map()
-    game_map.generation(20, 20)
+    game_map.generation(20, 20, 5)
     while game.state == GameState.RUNNING:
+        if game.killed_enemies == 20:
+            game_map = map.Map()
+            game_map.generation(20, 20, 5)
+            game.cleared_maps += 1
+
+        if game.cleared_maps == 3:
+            print("Вы прошли игру!")
+            game.state = GameState.EXITING
+
         match game.turn_state:
             case TurnState.EXPLORING_WORLD:
                 print()
+                game_map.show_map()
                 print("Выберите опцию цифрой:")
                 print("0: Выйти")
                 print("1: Продвинуться дальше")
                 print("2: Использовать предмет")
                 print("3: Экипировать предмет")
                 print("4: Посмотреть характеристики")
-                print("5: Показать карту")
                 user_input: int = handle_input(4)
                 match user_input:
                     case 0:
                         game.state = GameState.EXITING
+                        break
                     case 1:
                         print()
                         print("Выберите направление:")
@@ -98,7 +142,7 @@ if __name__ == "__main__":
                         print("2: Вниз")
                         print("3: Влево")
                         print("4: Вправо")
-                        direction = handle_input(3)
+                        direction = handle_input()
                         while True:
                             match direction - 1:
                                 case map.Dirs.RIGHT.value:
@@ -122,6 +166,10 @@ if __name__ == "__main__":
 
                             if tile == 4:  # предмет
                                 game.turn_state = TurnState.FOUND_ITEM
+
+                            if tile == 5:  # нпц
+                                game.turn_state = TurnState.TALK_TO_NPC
+
                             break
 
                     case 2:
@@ -130,11 +178,14 @@ if __name__ == "__main__":
                         character.equip_item()
                     case 4:
                         character.get_stats()
-                    case 5:
-                        game_map.show_map()
 
             case TurnState.IN_BATTLE:
-                enemy = random.choice(Game.enemies)
+                if game.killed_enemies == 19:
+                    enemy = Boss("Босс")
+                elif random.randint(0, 1) == 0:
+                    enemy = Witch("Ведьма")
+                else:
+                    enemy = Bandit("Бандит")
 
                 while True:
                     print()
@@ -148,29 +199,65 @@ if __name__ == "__main__":
                         case 0:
                             print("Вы сбежали и ничего не получаете!")
                             game.turn_state = TurnState.EXPLORING_WORLD
+                            game.killed_enemies += 1
                             break
                         case 1:
-                            attack, is_dead = character.attack(enemy)
+                            attack = character.attack(enemy)
                             print(f"Вы ударили врага на {attack} ОЗ, у врага осталось {enemy.hp} ОЗ")
 
-                            if is_dead:
+                            if enemy.hp <= 0:
                                 print("Вы победили!")
                                 game.turn_state = TurnState.FOUND_ITEM
+                                game.killed_enemies += 1
                                 break
 
                             print(enemy.attack(character))
                             print(f"У вас осталось {character.hp}")
+
                             if character.hp <= 0:
                                 print("Вы умерли! Конец игры!")
                                 game.state = GameState.EXITING
                                 break
                             continue
                         case 2:
-                            character.use_spell()
+                            character.use_spell(enemy)
+
+                            if enemy.hp <= 0:
+                                print("Вы победили!")
+                                game.turn_state = TurnState.FOUND_ITEM
+                                game.killed_enemies += 1
+                                break
+
+                            print(enemy.attack(character))
+                            print(f"У вас осталось {character.hp}")
+
+                            if character.hp <= 0:
+                                print("Вы умерли! Конец игры!")
+                                game.state = GameState.EXITING
+                                break
                             continue
 
             case TurnState.FOUND_ITEM:
                 item = random.choice(Game.items)
+
+                if isinstance(item, Chest):
+                    print(f"Вы нашли {item}")
+                    print(item.use(character, game))
+                    game.turn_state = TurnState.EXPLORING_WORLD
+                    continue
+
+                if isinstance(item, Trap):
+                    print(f"Вы понимаете, что попали в ловушку {item}")
+                    print(item.use(character, game))
+
+                    if character.hp <= 0:
+                        print("Вы умерли! Конец игры!")
+                        game.state = GameState.EXITING
+                        break
+
+                    game.turn_state = TurnState.EXPLORING_WORLD
+                    continue
+
                 print(f"Вы нашли предмет {item}")
                 print("Выберите опцию:")
                 print("0: Не брать")
@@ -186,3 +273,28 @@ if __name__ == "__main__":
                             game.turn_state = TurnState.EXPLORING_WORLD
                         character.items.append(item)
                         game.turn_state = TurnState.EXPLORING_WORLD
+
+            case TurnState.FOUND_SPELL:
+                if len(Game.spells) == 0:
+                    print("Вы уже выучили все заклинания")
+                    game.turn_state = TurnState.EXPLORING_WORLD
+                    continue
+
+                spell = random.choice(Game.spells)
+
+                print(f"Вы нашли заклинание {spell}")
+                character.spells.append(spell)
+                Game.spells = [s for s in Game.spells if not isinstance(s, spell.__class__)]
+                game.turn_state = TurnState.EXPLORING_WORLD
+
+            case TurnState.TALK_TO_NPC:
+                print(f"Маг: Здравствуй, {character.name}!")
+                if character.iq < 20:
+                    print("Вам не о чем было говорить с магом, Вы слишком мало знаете, повысьте интеллект")
+                    game.turn_state = TurnState.EXPLORING_WORLD
+                elif character.iq >= 20 and character.iq <= 25:
+                    print("Магу понравился разговор с Вами и он пообещал обучить Вас заклинанию, если Вы станете немного умнее")
+                    game.turn_state = TurnState.EXPLORING_WORLD
+                else:
+                    print("Магу очень понравился Ваш с ним диалог и он обучил Вас заклинанию!")
+                    game.turn_state = TurnState.FOUND_SPELL

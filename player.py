@@ -1,6 +1,6 @@
 from main import handle_input
-from items import Item
-from spells import Spells
+from items import Item, Sword, Boots, Shield
+from spells import Spells, Invulnerability
 
 
 class Player:
@@ -21,36 +21,35 @@ class Player:
             print("У Вас нет предметов")
             return
 
-        while True:
-            print()
-            print("Выберите предмет из списка цифрой:")
-            print("0: Отмена")
-            for i, item in enumerate(self.items):
-                print(f"{i + 1}: {item.name}")
+        print()
+        print("Выберите предмет из списка цифрой:")
+        print("0: Отмена")
+        for i, item in enumerate(self.items):
+            print(f"{i + 1}: {item.name}")
 
-            choice = handle_input(len(self.items))
+        choice = handle_input(len(self.items))
 
-            if choice == 0:
-                break
-            self.items[choice - 1].use()
+        if choice == 0:
+            return
+        self.items[choice - 1].use(self)
+        self.items.pop(choice - 1)
 
-    def use_spell(self):
+    def use_spell(self, enemy):
         if len(self.spells) == 0:
             print()
             print("У Вас нет заклинаний")
             return
 
-        while True:
-            print("Выберите заклинание из списка цифрой:")
-            print("0: Отмена")
-            for i, spell in enumerate(self.spells):
-                print(f"{i + 1}: {spell.name}")
+        print("Выберите заклинание из списка цифрой:")
+        print("0: Отмена")
+        for i, spell in enumerate(self.spells):
+            print(f"{i + 1}: {spell.name}")
 
-            choice = handle_input(len(self.items))
+        choice = handle_input(len(self.items))
 
-            if choice == 0:
-                break
-            self.spells[choice - 1].use()
+        if choice == 0:
+            return
+        self.spells[choice - 1].use(self, enemy)
 
     def equip_item(self):
         if len(self.items) == 0:
@@ -66,7 +65,11 @@ class Player:
             choice = handle_input(len(self.items))
 
             if choice == 0:
-                break
+                return
+
+            if not isinstance(self.items[choice - 1], Boots) and not isinstance(self.items[choice - 1], Sword) and not isinstance(self.items[choice - 1], Shield):
+                print("Вы не можете экипировать это, попробуйте еще раз")
+                continue
 
             if self.equiped:
                 item = self.equiped
@@ -75,6 +78,7 @@ class Player:
                 return
 
             self.equiped = self.items.pop(choice - 1)
+            break
 
     def get_stats(self):
         print()
@@ -85,17 +89,13 @@ class Player:
         print(f"Защита = {self.defence}")
         print(f"Уклонение = {self.dodge}")
 
-    def attack(self, enemy) -> (int, bool):
+    def attack(self, enemy) -> int:
         attack: int = self.strength
-        if self.equiped:
+        if isinstance(self.equiped, Sword):
             if self.equiped.power:
                 attack += self.equiped.power
         enemy.hp -= attack
-
-        if enemy.hp <= 0:
-            return (attack, True)
-
-        return (attack, False)
+        return attack
 
 
 class Wizard(Player):
@@ -106,6 +106,7 @@ class Wizard(Player):
         self.iq: int = 15
         self.defence: int = 5
         self.dodge: int = 5
+        self.spells: list[Spells] = [Invulnerability("", "", 0)]
 
 
 class Warrior(Player):

@@ -1,5 +1,5 @@
-import random
 import main
+from spells import Chest_Open
 
 
 
@@ -50,30 +50,38 @@ class Trap(Item):
         self.diff = difficulty
         self.inj = injury
 
-    def use(self, character):
-        if character.strength < self.diff:
-            character.hp -= self.inj
-            return f'Персонаж не смог выбраться из капкана и ему пришлось ампутировать конечность. Показатель hp уменьшен на {self.inj}'
-        print(f'Неожиданно кто-то напал из кустов!')
-        game.turn_state = TurnState.IN_BATTLE
+    def use(self, character, game):
+        if self.name == "Капкан":
+            if character.strength < self.diff:
+                character.hp -= self.inj
+                return f'Персонаж не смог выбраться из ловушки невредимым и ему пришлось ампутировать конечность. Показатель hp уменьшен на {self.inj}'
+            else:
+                return "Вы были достаточны сильные и смогли разжать капкан и выбраться!"
+
+        if character.dodge > self.diff:
+            return "Вы были достаточно ловки и смогли избежать ловушки!"
+        print("Вы не смогли избежать ловушки!")
+
+        character.hp -= self.inj
+        game.turn_state = main.TurnState.IN_BATTLE
+        return 'Неожиданно кто-то напал из кустов!'
 
 
 class Chest(Item):
     def __init__(self, name, description, difficulty):
         super().__init__(name, description)
         self.diff = difficulty
-        self.item = random.choice(main.Game.spells)
 
-    def use(self, character):
+    def use(self, character, game):
         if character.strength < self.diff:
             if character.mana >= 2:
-                if 'chest_open' in character.spells:
+                if any(isinstance(spell, Chest_Open) for spell in character.spells):
                     return f'Сундук открыт заклинанием. В сундуке оказалось заклинание!'
+                character.mana -= 2
             return f'Сундук не удалось открыть. Попробуйте увеличить показатель силы, маны или получите заклинание для открытия сундука'
+        game.state = main.TurnState.FOUND_SPELL
         return f'Сундук открыт. В сундуке оказалось заклинание!'
-        game.state = TurnState.FOUND_SPELL
 
-    
 
 class Shield(Item):
     def __init__(self, name, description, weight, power):

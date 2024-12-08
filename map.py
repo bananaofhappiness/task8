@@ -31,10 +31,11 @@ class Map:
                 self.game_map[x, y] = 2
                 break
 
-    def generation(self, monnum, itemnum):
+    def generation(self, monnum, itemnum, npcnum):
         self.monnum = monnum
         self.itemnum = itemnum
-        if self.monnum + self.itemnum <= 49:
+        self.npcnum = npcnum
+        if self.monnum + self.itemnum + self.npcnum <= 49:
             while self.monnum != 0:
                 mx = rn.randint(0, 9)
                 my = rn.randint(0, 9)
@@ -47,6 +48,12 @@ class Map:
                 if self.game_map[mx, my] != 0 and self.game_map[mx, my] != 2 and self.game_map[mx, my] != 3:
                     self.game_map[mx, my] = 4
                     self.itemnum -= 1
+            while self.npcnum != 0:
+                mx = rn.randint(0, 9)
+                my = rn.randint(0, 9)
+                if self.game_map[mx, my] != 0 and self.game_map[mx, my] != 2 and self.game_map[mx, my] != 3 and self.game_map[mx, my] != 4:
+                    self.game_map[mx, my] = 5
+                    self.npcnum -= 1
         else:
             print("Генерация мира по вашим параметрам невозможна, попробуйте снова")
 
@@ -64,10 +71,12 @@ class Map:
                     new_game_map[i, j] = ':<'
                 elif new_game_map[i, j] == '4':
                     new_game_map[i, j] = '?'
-        maxlen = max([len(str(j)) for i in new_game_map for j in i]) + 1
+                elif new_game_map[i, j] == '5':
+                    new_game_map[i, j] = '!'
+        # maxlen = max([len(str(j)) for i in new_game_map for j in i]) + 1
         for i in new_game_map:
             for j in i:
-                print(f'{j:>{maxlen}}', end=" ")
+                print(f'{j:>3}', end=" ")
             print()
 
 
@@ -84,7 +93,7 @@ class Map:
             new_x, new_y = x + 1, y
         elif direc == Dirs.LEFT:
             new_x, new_y = x, y - 1
-        elif direc == Dirs.Right:
+        elif direc == Dirs.RIGHT:
             new_x, new_y = x, y + 1
         else:
             print("Некорректное направление")
