@@ -61,8 +61,8 @@ class Trap(Item):
         if character.dodge > self.diff:
             return "Вы были достаточно ловки и смогли избежать ловушки!"
         print("Вы не смогли избежать ловушки!")
-
         character.hp -= self.inj
+        game.killed_enemies -= 1
         game.turn_state = main.TurnState.IN_BATTLE
         return 'Неожиданно кто-то напал из кустов!'
 
@@ -76,10 +76,12 @@ class Chest(Item):
         if character.strength < self.diff:
             if character.mana >= 2:
                 if any(isinstance(spell, Chest_Open) for spell in character.spells):
+                    game.turn_state = main.TurnState.FOUND_SPELL
                     return f'Сундук открыт заклинанием. В сундуке оказалось заклинание!'
                 character.mana -= 2
+            game.turn_state = main.TurnState.EXPLORING_WORLD
             return f'Сундук не удалось открыть. Попробуйте увеличить показатель силы, маны или получите заклинание для открытия сундука'
-        game.state = main.TurnState.FOUND_SPELL
+        game.turn_state = main.TurnState.FOUND_SPELL
         return f'Сундук открыт. В сундуке оказалось заклинание!'
 
 

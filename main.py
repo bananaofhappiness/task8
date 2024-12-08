@@ -28,7 +28,7 @@ class Game:
             Potion("Зелье защиты", "Увеличивает защиту на 5", "defence", 5),
             Potion("Зелье уклонения", "Увеличивает уклонение на 5", "dodge", 5),
             Potion("Большое зелье силы", "Увеличивает силу на 10", "strength", 10),
-            Potion("Большое зелье интеллекта", "Увеличивает интеллект на 10", "iq", 10),
+            # Potion("Большое зелье интеллекта", "Увеличивает интеллект на 10", "iq", 10),
             Potion("Большое зелье маны", "Увеличивает ману на 10", "mana", 10),
             Potion("Большое зелье защиты", "Увеличивает защиту на 10", "defence", 10),
             Potion("Большое зелье уклонения", "Увеличивает уклонение на 10", "dodge", 10),
@@ -62,6 +62,7 @@ class Game:
         self.turn_state: TurnState = TurnState.EXPLORING_WORLD
         self.killed_enemies = 0
         self.cleared_maps = 0
+        self.after_fight = False
 
 
 def handle_input(n):
@@ -209,6 +210,7 @@ if __name__ == "__main__":
                                 print("Вы победили!")
                                 game.turn_state = TurnState.FOUND_ITEM
                                 game.killed_enemies += 1
+                                game.after_fight = True
                                 break
 
                             print(enemy.attack(character))
@@ -226,6 +228,7 @@ if __name__ == "__main__":
                                 print("Вы победили!")
                                 game.turn_state = TurnState.FOUND_ITEM
                                 game.killed_enemies += 1
+                                game.after_fight = True
                                 break
 
                             print(enemy.attack(character))
@@ -240,10 +243,14 @@ if __name__ == "__main__":
             case TurnState.FOUND_ITEM:
                 item = random.choice(Game.items)
 
+                if game.after_fight:
+                    game.after_fight = False
+                    while isinstance(item, Trap):
+                        item = random.choice(Game.items)
+
                 if isinstance(item, Chest):
                     print(f"Вы нашли {item}")
                     print(item.use(character, game))
-                    game.turn_state = TurnState.EXPLORING_WORLD
                     continue
 
                 if isinstance(item, Trap):
@@ -290,11 +297,11 @@ if __name__ == "__main__":
             case TurnState.TALK_TO_NPC:
                 print(f"Маг: Здравствуй, {character.name}!")
                 if character.iq < 20:
-                    print("Вам не о чем было говорить с магом, Вы слишком мало знаете, повысьте интеллект")
+                    print(f"Маг: {character.name}, ты слишком мало знаешь, мне не о чем с тобой говорить")
                     game.turn_state = TurnState.EXPLORING_WORLD
                 elif character.iq >= 20 and character.iq <= 25:
-                    print("Магу понравился разговор с Вами и он пообещал обучить Вас заклинанию, если Вы станете немного умнее")
+                    print(f"Маг: {character.name}, ты хороший собеседник. Если ты еще немного обучишься, то я смогу обучить тебя заклинанию")
                     game.turn_state = TurnState.EXPLORING_WORLD
                 else:
-                    print("Магу очень понравился Ваш с ним диалог и он обучил Вас заклинанию!")
+                    print("Маг: {character.name}, ты прирожденный волшебник! Я обучу тебя всему, что знаю сам!")
                     game.turn_state = TurnState.FOUND_SPELL
