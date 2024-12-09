@@ -148,6 +148,7 @@ if __name__ == "__main__":
                         print("2: Вниз")
                         print("3: Влево")
                         print("4: Вправо")
+
                         direction = handle_input(4)
                         while True:
                             match direction:
