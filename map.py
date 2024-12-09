@@ -73,7 +73,6 @@ class Map:
                     new_game_map[i, j] = '?'
                 elif new_game_map[i, j] == '5':
                     new_game_map[i, j] = '!'
-        # maxlen = max([len(str(j)) for i in new_game_map for j in i]) + 1
         for i in new_game_map:
             for j in i:
                 print(f'{j:>3}', end=" ")
@@ -107,3 +106,12 @@ class Map:
             return old_num
         else:
             return 0
+
+        def get_enemy_count(self):
+            enemy_count = 0
+            for i in range(10):
+                for j in range(10):
+                    if self.game_map[i, j] == 3:
+                        enemy_count += 1
+            print(f'Оставшееся количество врагов: {enemy_count}')
+        
