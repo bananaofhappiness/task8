@@ -149,8 +149,8 @@ if __name__ == "__main__":
                         print("3: Влево")
                         print("4: Вправо")
 
-                        direction = handle_input(4)
                         while True:
+                            direction = handle_input(4)
                             match direction:
                                 case 4:
                                     tile = game_map.move(map.Dirs.RIGHT)
