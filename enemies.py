@@ -11,14 +11,8 @@ class Enemies():
     def attack(self, character):
         probability = character.dodge
         random_number = random.randint(0, 100)
-        bonus = 0
-        dodge_bonus = 0
-        if isinstance(character.equiped, Shield):
-            bonus = character.equiped.power
-        if isinstance(character.equiped, Boots):
-            dodge_bonus = character.equiped.power
-        if random_number > (probability + dodge_bonus):
-            character.hp -= (self.attacki - self.attacki * (character.defence + bonus) // 100)
+        if random_number > probability:
+            character.hp -= (self.attacki - self.attacki * character.defence // 100)
             return f'{self.name} ранит героя на {self.attacki} урона'
         return f'Персонаж успешно отразил атаку'
 

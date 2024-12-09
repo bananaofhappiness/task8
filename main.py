@@ -27,11 +27,13 @@ class Game:
             Potion("Зелье маны", "Увеличивает ману на 5", "mana", 5),
             Potion("Зелье защиты", "Увеличивает защиту на 5", "defence", 5),
             Potion("Зелье уклонения", "Увеличивает уклонение на 5", "dodge", 5),
+            Potion("Зелье здоровья", "Увеличивает здоровье на 25", "hp", 25),
             Potion("Большое зелье силы", "Увеличивает силу на 10", "strength", 10),
             # Potion("Большое зелье интеллекта", "Увеличивает интеллект на 10", "iq", 10),
             Potion("Большое зелье маны", "Увеличивает ману на 10", "mana", 10),
             Potion("Большое зелье защиты", "Увеличивает защиту на 10", "defence", 10),
             Potion("Большое зелье уклонения", "Увеличивает уклонение на 10", "dodge", 10),
+            Potion("Большое зелье здоровья", "Увеличивает здоровье на 50", "hp", 50),
             Shield("Щит", "Дает бонус к защите (5)", 20, 5),
             Shield("Большой щит", "Дает бонус к защите (10)", 50, 10),
             Sword("Меч", "Дает бонус к атаке (5)", 5),
@@ -60,9 +62,9 @@ class Game:
     def __init__(self):
         self.state: GameState = GameState.RUNNING
         self.turn_state: TurnState = TurnState.EXPLORING_WORLD
-        self.killed_enemies = 0
         self.cleared_maps = 0
         self.after_fight = False
+        self.boss_killed = False
 
 
 def handle_input(n):
@@ -74,7 +76,8 @@ def handle_input(n):
             continue
 
         if user_input > n or user_input < 0:
-            print("Такого выбора нет, попробуйсте снова")
+            print("Такого выбора нет, попробуйте снова")
+            continue
 
         return user_input
 
@@ -112,10 +115,11 @@ if __name__ == "__main__":
     game_map = map.Map()
     game_map.generation(20, 20, 5)
     while game.state == GameState.RUNNING:
-        if game.killed_enemies == 20:
+        if game.boss_killed:
             game_map = map.Map()
             game_map.generation(20, 20, 5)
             game.cleared_maps += 1
+            game.boss_killed = False
 
         if game.cleared_maps == 3:
             print("Вы прошли игру!")
@@ -130,8 +134,9 @@ if __name__ == "__main__":
                 print("1: Продвинуться дальше")
                 print("2: Использовать предмет")
                 print("3: Экипировать предмет")
-                print("4: Посмотреть характеристики")
-                user_input: int = handle_input(4)
+                print("4: Выбросить предмет")
+                print("5: Посмотреть характеристики")
+                user_input: int = handle_input(5)
                 match user_input:
                     case 0:
                         game.state = GameState.EXITING
@@ -143,19 +148,20 @@ if __name__ == "__main__":
                         print("2: Вниз")
                         print("3: Влево")
                         print("4: Вправо")
-                        direction = handle_input()
+
+                        direction = handle_input(4)
                         while True:
-                            match direction - 1:
-                                case map.Dirs.RIGHT.value:
+                            match direction:
+                                case 4:
                                     tile = game_map.move(map.Dirs.RIGHT)
 
-                                case map.Dirs.LEFT.value:
+                                case 3:
                                     tile = game_map.move(map.Dirs.LEFT)
 
-                                case map.Dirs.UP.value:
+                                case 1:
                                     tile = game_map.move(map.Dirs.UP)
 
-                                case map.Dirs.DOWN.value:
+                                case 2:
                                     tile = game_map.move(map.Dirs.DOWN)
 
                                 case _:
@@ -178,10 +184,12 @@ if __name__ == "__main__":
                     case 3:
                         character.equip_item()
                     case 4:
+                        character.delete_item()
+                    case 5:
                         character.get_stats()
 
             case TurnState.IN_BATTLE:
-                if game.killed_enemies == 19:
+                if map.get_enemy_count() == 0:
                     enemy = Boss("Босс")
                 elif random.randint(0, 1) == 0:
                     enemy = Witch("Ведьма")
@@ -198,9 +206,18 @@ if __name__ == "__main__":
                     choice = handle_input(2)
                     match choice:
                         case 0:
-                            print("Вы сбежали и ничего не получаете!")
+                            if isinstance(enemy, Boss):
+                                print("Вы не можете сбежать от босса!")
+                                continue
+
+                            character.hp -= 5
+                            if character.hp <= 0:
+                                print("Вы умерли при побеге! Конец игры!")
+                                game.state = GameState.EXITING
+                                break
+
+                            print("Вы сбежали, получили 5 урона при побеге и не получили предмет!")
                             game.turn_state = TurnState.EXPLORING_WORLD
-                            game.killed_enemies += 1
                             break
                         case 1:
                             attack = character.attack(enemy)
@@ -209,7 +226,6 @@ if __name__ == "__main__":
                             if enemy.hp <= 0:
                                 print("Вы победили!")
                                 game.turn_state = TurnState.FOUND_ITEM
-                                game.killed_enemies += 1
                                 game.after_fight = True
                                 break
 
@@ -222,22 +238,20 @@ if __name__ == "__main__":
                                 break
                             continue
                         case 2:
-                            character.use_spell(enemy)
+                            if character.use_spell(enemy):
+                                if enemy.hp <= 0:
+                                    print("Вы победили!")
+                                    game.turn_state = TurnState.FOUND_ITEM
+                                    game.after_fight = True
+                                    break
 
-                            if enemy.hp <= 0:
-                                print("Вы победили!")
-                                game.turn_state = TurnState.FOUND_ITEM
-                                game.killed_enemies += 1
-                                game.after_fight = True
-                                break
+                                print(enemy.attack(character))
+                                print(f"У вас осталось {character.hp}")
 
-                            print(enemy.attack(character))
-                            print(f"У вас осталось {character.hp}")
-
-                            if character.hp <= 0:
-                                print("Вы умерли! Конец игры!")
-                                game.state = GameState.EXITING
-                                break
+                                if character.hp <= 0:
+                                    print("Вы умерли! Конец игры!")
+                                    game.state = GameState.EXITING
+                                    break
                             continue
 
             case TurnState.FOUND_ITEM:
@@ -250,18 +264,22 @@ if __name__ == "__main__":
 
                 if isinstance(item, Chest):
                     print(f"Вы нашли {item}")
-                    print(item.use(character, game))
+                    if item.use(character):
+                        game.turn_state = TurnState.FOUND_SPELL
+                        continue
+                    game.turn_state = TurnState.EXPLORING_WORLD
                     continue
 
                 if isinstance(item, Trap):
                     print(f"Вы понимаете, что попали в ловушку {item}")
-                    print(item.use(character, game))
+                    if not item.use(character):
+                        if character.hp <= 0:
+                            print("Вы умерли! Конец игры!")
+                            game.state = GameState.EXITING
+                            break
 
-                    if character.hp <= 0:
-                        print("Вы умерли! Конец игры!")
-                        game.state = GameState.EXITING
-                        break
-
+                        game.turn_state = TurnState.IN_BATTLE
+                        continue
                     game.turn_state = TurnState.EXPLORING_WORLD
                     continue
 
