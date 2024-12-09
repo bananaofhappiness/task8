@@ -208,7 +208,14 @@ if __name__ == "__main__":
                             if isinstance(enemy, Boss):
                                 print("Вы не можете сбежать от босса!")
                                 continue
-                            print("Вы сбежали и ничего не получаете!")
+
+                            character.hp -= 5
+                            if character.hp <= 0:
+                                print("Вы умерли при побеге! Конец игры!")
+                                game.state = GameState.EXITING
+                                break
+
+                            print("Вы сбежали, получили 5 урона при побеге и не получили предмет!")
                             game.turn_state = TurnState.EXPLORING_WORLD
                             break
                         case 1:
