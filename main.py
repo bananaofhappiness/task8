@@ -116,6 +116,7 @@ if __name__ == "__main__":
     game_map.generation(20, 20, 5)
     while game.state == GameState.RUNNING:
         if game.boss_killed:
+            print('Вы перешли на новый этаж!')
             game_map = map.Map()
             game_map.generation(20, 20, 5)
             game.cleared_maps += 1
