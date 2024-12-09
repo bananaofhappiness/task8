@@ -18,8 +18,10 @@ class Spells():
     def use(self, character):
         print(f'Заклинание {self.name}. {self.desc}')
         if character.mana < self.value:
-            return f'Пополните ману до {self.value}'
+            print(f'Пополните ману до {self.value}')
+            return False
         character.mana -= self.value
+        return True
 
 
 class Froze(Spells):
@@ -30,8 +32,10 @@ class Froze(Spells):
         self.value = 2
 
     def use(self, character, enemy):
-        super().use(character)
-        character.attack(enemy)
+        if super().use(character):
+            character.attack(enemy)
+            return True
+        return False
 
 
 class Fatality(Spells):
@@ -42,8 +46,10 @@ class Fatality(Spells):
         self.value = 7
 
     def use(self, character, enemy):
-        super().use(character)
-        enemy.hp = 0
+        if super().use(character):
+            enemy.hp = 0
+            return True
+        return False
 
 
 class Swallow(Spells):
@@ -54,10 +60,12 @@ class Swallow(Spells):
         self.value = 1
 
     def use(self, character, enemy):
-        super().use(character)
-        character.hp += 20
-        print(f"Здоровье увеличено до {character.hp}")
-        threading.Thread(target=self.reset_health(), args=[character]).start()
+        if super().use(character):
+            character.hp += 20
+            print(f"Здоровье увеличено до {character.hp}")
+            threading.Thread(target=self.reset_health(), args=[character]).start()
+            return True
+        return False
 
     def reset_health(self, character):
         time.sleep(60)
@@ -72,10 +80,12 @@ class Invulnerability(Spells):
         self.value = 1
 
     def use(self, character, enemy):
-        super().use(character)
-        character.dodge += 10
-        print(f"Уклонение увеличено до {character.dodge}")
-        threading.Thread(target=self.reset_dodge, args=[character]).start()
+        if super().use(character):
+            character.dodge += 10
+            print(f"Уклонение увеличено до {character.dodge}")
+            threading.Thread(target=self.reset_dodge, args=[character]).start()
+            return True
+        return False
 
     def reset_dodge(self, character):
         time.sleep(60)
@@ -90,8 +100,10 @@ class Distant_Attack(Spells):
         self.value = 2
 
     def use(self, character, enemy):
-        super().use(character)
-        enemy.hp -= 20
+        if super().use(character):
+            enemy.hp -= 20
+            return True
+        return False
 
 
 class Chest_Open(Spells):
@@ -103,3 +115,4 @@ class Chest_Open(Spells):
 
     def use(self, character, enemy):
         print("Оно используется автоматически, когда вы встретите сундук")
+        return False
