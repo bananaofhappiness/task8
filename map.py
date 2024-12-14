@@ -113,5 +113,3 @@ class Map:
                 for j in range(10):
                     if self.game_map[i, j] == 3:
                         enemy_count += 1
-            
-        

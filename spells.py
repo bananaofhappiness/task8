@@ -116,3 +116,4 @@ class Chest_Open(Spells):
     def use(self, character, enemy):
         print("Оно используется автоматически, когда вы встретите сундук")
         return False
+

@@ -46,3 +46,4 @@ class Boss(Enemies):
             self.attacki += 5
             print(f'Босс переходит в следующую стадию и урон увеличивается')
         return super().attack(character)
+    

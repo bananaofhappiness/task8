@@ -324,3 +324,4 @@ if __name__ == "__main__":
                 else:
                     print("Маг: {character.name}, ты прирожденный волшебник! Я обучу тебя всему, что знаю сам!")
                     game.turn_state = TurnState.FOUND_SPELL
+                    
