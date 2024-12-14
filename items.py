@@ -146,3 +146,4 @@ class Sword(Item):
         character.strength -= self.power
         character.equiped_sword = None
         character.items.append(self)
+

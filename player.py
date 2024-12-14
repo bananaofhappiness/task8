@@ -154,3 +154,4 @@ class Rogue(Player):
         self.iq = 12
         self.defence: int = 5
         self.dodge: int = 20
+
